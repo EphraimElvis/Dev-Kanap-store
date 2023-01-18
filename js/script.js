@@ -1,11 +1,15 @@
+//recreate 
+//use the for loop
+//use dom manipulation
+//implement try catch for the fetch
+
 //Api request
 fetch("http://localhost:3000/api/products")
   .then((res) => res.json())
-  .then((data) => listAllProucts(data))
+  .then((data) => listAllProducts(data))
 
 //create product ui
 const createProductTable = (item) => {
-  
   const productItems = document.querySelector("#items");
     productItems.innerHTML += 
     `<a href="./product.html?id=${item._id}">
@@ -17,10 +21,12 @@ const createProductTable = (item) => {
     </a>`; 
 }
 
-//list all product itmes
-const listAllProucts = (products) => {
+//list all products items
+const listAllProducts = (products) => {
   const allProducts = products.map((product) => {
     createProductTable(product)
   })
 }
+
+
 
