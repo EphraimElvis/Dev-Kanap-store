@@ -16,6 +16,7 @@ const orderItem = { //orderItem
   quantity: 0,
 }
 
+//update order item color
 const updateCartColor = (color) => {
   orderItem.color = color;
 }
