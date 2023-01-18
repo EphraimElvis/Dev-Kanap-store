@@ -1,13 +1,12 @@
 //Api request
 fetch("http://localhost:3000/api/products")
   .then((res) => res.json())
-  .then((data) => console.log(data))
- 
-
+  .then((data) => listAllProucts(data))
+  
 //create product ui
 const createProductTable = (item) => {
   const productItems = document.querySelector("#items");
-    productItems.innerHTML = 
+    productItems.innerHTML += 
     `<a href="./product.html?id=42">
       <article>
       <img src="${item.imageUrl}" alt="Lorem ipsum dolor sit amet, Kanap name1">
@@ -16,3 +15,11 @@ const createProductTable = (item) => {
       </article>
     </a>`; 
 }
+
+//list all product itmes
+const listAllProucts = (products) => {
+  const allProducts = products.map((product) => {
+    createProductTable(product)
+  })
+}
+
