@@ -22,11 +22,11 @@ const showImage = (pr) => {
   productName.innerHTML = `${pr.name}`;
   productPrce.innerHTML = `${pr.price}`;
   productDescription.innerHTML = `${pr.description}`;
-  createOptions(pr)
+  createSelectOptions(pr)
 }
 
 //create select options
-const createOptions = (arr) => {
+const createSelectOptions = (arr) => {
   arr.colors.map((color) => {
     const createOption = document.createElement('option');
     createOption.value = color;
