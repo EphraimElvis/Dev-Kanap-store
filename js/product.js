@@ -4,7 +4,7 @@ const productPrce = document.querySelector("#price")
 const productDescription = document.querySelector("#description");
 const selectColor = document.querySelector("#colors");
 
-//get page url id
+//get page url id  
 //const pageURL = window.location.href;
 const params = new URLSearchParams(document.location.search);
 let id = params.get("id");
@@ -13,8 +13,7 @@ let id = params.get("id");
 fetch(`http://localhost:3000/api/products/${id}`)
   .then((res) => res.json())
   .then((data) => {
-    //console.log(data);
-    showImage(data)
+    showImage(data);
   })
 
 //display item
