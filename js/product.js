@@ -20,7 +20,7 @@ const orderItem = { //orderItem
 const updateCartColor = (color) => {
   orderItem.color = color;
 }
-
+//sets order item value
 const setQuantity = (qnt) => {
   orderItem.quantity = qnt;
 }
