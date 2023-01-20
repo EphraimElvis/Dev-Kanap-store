@@ -107,6 +107,7 @@ addOrderItemtoCart.addEventListener("click", (e) => {
   if (already) {
     already.quantity += orderItem.quantity;
   } else {
+    //push to local array of onjects
     carts.push({
       "productId": orderItem.productId,
       "color": orderItem.color,
