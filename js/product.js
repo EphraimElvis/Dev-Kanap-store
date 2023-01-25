@@ -1,11 +1,12 @@
 const itemImg = document.querySelector(".item__img");
 const createImg = document.createElement("img");
 const productName = document.querySelector("#title");
-const productPrice = document.querySelector("#price")
+const productPrice = document.querySelector("#price");
 const productDescription = document.querySelector("#description");
 const selectColor = document.querySelector("#colors");
 const addOrderItemtoCart = document.querySelector("#addToCart");
 const quantity = document.querySelector("#quantity");
+const itemQuantity = document.querySelector(".itemQuantity");
 //let getImage = null;
 //track current state of order
 const orderItem = { //orderItem
@@ -91,26 +92,29 @@ quantity.addEventListener("change", (e) => {
 addOrderItemtoCart.addEventListener("click", (e) => {
   if (orderItem.color.length === 0) {
       alert("Please select Product Color");
-      console.log("no item added to orderItem");
       return;
   }
   //add to cart
   const cartStorage = JSON.parse(localStorage.getItem('carts'));
-  //console.log("cartstorage",cartStorage)
   const carts = cartStorage || [];
   const already = carts.find( (product) => {
     const matchId = product.productId === orderItem.productId;
     const matchColor = product.color === orderItem.color;
     return matchId && matchColor;
   }) 
-  //console.log("already",already)
+  
+  //update product price
+  //make this a module sice it repeats in other js file
   if (already) {
     already.quantity += orderItem.quantity;
+    already.price = already.originalPrice * Number(already.quantity);
+    //console.log(" total price", already.originalPrice * Number(already.quantity));
   } else {
     //push to local array of onjects
     carts.push({
       "productId": orderItem.productId,
       "color": orderItem.color,
+      "originalPrice": productPrice.textContent,
       "price": orderItem.price,
       "quantity": orderItem.quantity,
       "image": orderItem.image,
@@ -122,23 +126,3 @@ addOrderItemtoCart.addEventListener("click", (e) => {
   localStorage.setItem("carts", JSON.stringify(carts));
 });
 
-
-function drawImage (img) {
-  //const img = 'http://localhost:3000/images/kanap02.jpeg';
-  console.log("image",img);
-  const canvas = document.createElement("canvas");
-  canvas.width = img.width;
-  canvas.height = img.height;
-
-  const context = canvas.getContext("2d");
-  context.drawImage(img, 0, 0);
-
-  var dataImage = localStorage.getItem('saved-image-example');
-  img.src = dataImage;
-
-  try {
-    localStorage.setItem("saved-image-example", canvas.toDataURL("image/jpeg"));
-  } catch (err) {
-    console.error(`Error ${err}`);
-  }
-}
