@@ -85,9 +85,11 @@ getCartItems.appendChild(fragment);
 
 //delete implementation
 const items = document.querySelector(".cart");
+let tmr = null;
 items.addEventListener("click", (event) => {
   event.stopImmediatePropagation();
   const delete_id = event.target.dataset.deleteId;
+  clearTimeout(tmr);
   if (event.target.classList.value === "deleteItem") {
     const filteredCarts = cartsInLocalStorage.filter((fill) => {
       let cartItems = cartsInLocalStorage[delete_id] !== fill;
@@ -95,7 +97,12 @@ items.addEventListener("click", (event) => {
         return cartItems;
     });
     localStorage.setItem("carts",JSON.stringify(filteredCarts));
-    window.location.reload();
+    tmr = setTimeout(() => {
+      document.location.reload();
+    }, 200);
+
+    
+    //document.location.reload();
   }
 });
 
