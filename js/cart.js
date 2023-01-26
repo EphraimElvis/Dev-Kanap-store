@@ -22,7 +22,7 @@ const createElements = (val, id) => {
 
   creatArticle.setAttribute("class", "cart__item");
   creatArticle.setAttribute("data-index", `${id}`);
-  creatArticle.setAttribute("data-id", "product-ID");
+  creatArticle.setAttribute("data-id", `${id}`);
   creatArticle.setAttribute("data-color", "product-color");
   creatDiv.setAttribute("class", "cart__item__img");
   createParagraphThree.setAttribute("id", "price");
@@ -71,19 +71,6 @@ cartsInLocalStorage.map((items, index) => {
 getCartItems.appendChild(fragment);
 
 //delete implementation
-// const dels = document.querySelectorAll(".deleteItem");
-// dels.forEach((del, index)=> {
-//   del.addEventListener("click", (e)=> {
-//    const fl = cartsInLocalStorage.filter((fill) => {
-//       let d = cartsInLocalStorage[index] !== fill
-//       return d;
-//     });
-//     localStorage.setItem("carts",JSON.stringify(fl));
-//     window.location.reload();
-//   });
-// });
-
-//delete implementation
 const items = document.querySelector(".cart");
 let tmr = null;
 items.addEventListener("click", (event) => {
@@ -97,32 +84,13 @@ items.addEventListener("click", (event) => {
         return cartItems;
     });
     localStorage.setItem("carts",JSON.stringify(filteredCarts));
-    tmr = setTimeout(() => {
-      document.location.reload();
-    }, 200);
-
-    
-    //document.location.reload();
+    //remove element
+    console.log(event.target.dataset.deleteId)
+    const dels = document.querySelector(`[data-id="${delete_id}"]`);
+    console.log(dels);
+    dels.remove();
   }
 });
-
-//const priceId = document.getElementById("price");
-//update item quantity and price
-// const updateCartQuantity = document.querySelectorAll(".itemQuantity");
-// for (let i = 0; i < updateCartQuantity.length; i++) {
-//   updateCartQuantity[i].addEventListener("change",(e) => {
-//     let quantity = Number(e.currentTarget.value);
-//     let totalOfQuantity = quantity * Number(priceId.textContent.slice(1));
-//     for (const el of cartsInLocalStorage) {
-//       const m = cartsInLocalStorage[i];
-//       m.quantity += quantity;
-//       m.price = totalOfQuantity;
-//       updateTotal();
-//       localStorage.setItem("carts", JSON.stringify(cartsInLocalStorage));
-//       return;
-//     }
-//   })
-// }
 
 const article = document.querySelector("#cart__items");
 article.addEventListener("click",(event) => {
@@ -153,7 +121,7 @@ function getTotal() {
 
 //on page load display total price in cart
 window.addEventListener("load",()=>{
-  getTotal();
+  //getTotal();
 })
 
 //form validation
