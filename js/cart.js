@@ -85,10 +85,10 @@ items.addEventListener("click", (event) => {
     });
     localStorage.setItem("carts",JSON.stringify(filteredCarts));
     //remove element
-    console.log(event.target.dataset.deleteId)
     const dels = document.querySelector(`[data-id="${delete_id}"]`);
-    console.log(dels);
     dels.remove();
+    //update total price
+    getTotal();
   }
 });
 
@@ -118,11 +118,6 @@ function getTotal() {
   }, 0);
   totalPrice.textContent = total;
 }
-
-//on page load display total price in cart
-window.addEventListener("load",()=>{
-  //getTotal();
-})
 
 //form validation
 const firstName = document.querySelector("#firstName");
@@ -174,8 +169,4 @@ firstName.addEventListener("keydown", (e)=> {
     }, 500)
   }
 })
-
-// firstName.addEventListener("keyup", (e) => {
-//   clearTimeout("timer cleared....",timer);
-// })
 
