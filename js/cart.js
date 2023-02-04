@@ -64,34 +64,34 @@ const createElements = (val, id) => {
   createCartItemContentSettingsDelete.appendChild(deleteItem);
   fragment.appendChild(creatArticle);
 }
-
 cartsInLocalStorage.map((items, index) => {
   createElements(items, index) ;
 });
+
 getCartItems.appendChild(fragment);
 
-//delete implementation
+//delete item in cart 
 const items = document.querySelector(".cart");
-let tmr = null;
 items.addEventListener("click", (event) => {
   event.stopImmediatePropagation();
   const delete_id = event.target.dataset.deleteId;
-  clearTimeout(tmr);
+  //console.log("fill",cartsInLocalStorage[delete_id]);
   if (event.target.classList.value === "deleteItem") {
     const filteredCarts = cartsInLocalStorage.filter((fill) => {
       let cartItems = cartsInLocalStorage[delete_id] !== fill;
-        console.log(cartItems);
-        return cartItems;
+
+      return cartItems;
     });
-    localStorage.setItem("carts",JSON.stringify(filteredCarts));
+
     //remove element
-    const dels = document.querySelector(`[data-id="${delete_id}"]`);
-    dels.remove();
-    //update total price
+    //document.querySelector(`[data-id="${delete_id}"]`).remove();
+    localStorage.setItem("carts",JSON.stringify(filteredCarts));
+    window.location.reload();
     getTotal();
   }
 });
 
+//update Price based on Quantity
 const article = document.querySelector("#cart__items");
 article.addEventListener("click",(event) => {
   let quantity = Number(event.target.value);
@@ -118,6 +118,7 @@ function getTotal() {
   }, 0);
   totalPrice.textContent = total;
 }
+getTotal();
 
 //form validation
 const firstName = document.querySelector("#firstName");
@@ -133,7 +134,7 @@ const emailErrorMsg = document.querySelector("#emailErrorMsg");
 const order = document.querySelector("#order");
 
 
-let timer, timer2 = null;
+let timer = null;
 
 firstName.addEventListener("keydown", (e)=> {
   clearTimeout("timer cleared....",timer);
