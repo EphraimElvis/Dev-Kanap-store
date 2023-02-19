@@ -120,7 +120,7 @@ function getTotal() {
 }
 getTotal();
 
-//form validation
+//form validation variables
 const firstName = document.querySelector("#firstName");
 const firstNameErrorMsg = document.querySelector("#firstNameErrorMsg");
 const lastName = document.querySelector("#lastName");
@@ -135,39 +135,70 @@ const order = document.querySelector("#order");
 
 
 let timer = null;
+let validateUsername = /^[a-zA-Z ]+$/;
+let validateUserAddress = /^[a-zA-Z0-9\s,'-]*$/;
+let validateUserEmail = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
+
+//show form error message
+const validateUserInput = (val, showMsg, detail) => {
+  if (!val) {
+    showMsg.style.display = "block";
+    showMsg.textContent = `Invalid ${detail}`;
+  } else {
+    showMsg.style.display = "none";
+  }
+}
+
+//test for users email adress input
+const validateEmail = (email) => {
+  return String(email)
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
+};
+
+let userObj = {
+  userName: ""
+}
 
 firstName.addEventListener("keydown", (e)=> {
-  clearTimeout("timer cleared....",timer);
-  let fname = e.target.value.trim();
+  clearTimeout(timer);
   timer = setTimeout(()=> {
-    console.log("length", fname.length, fname.trim());
-  },400);
+    let fname = e.target.value.trim().toUpperCase();
+    validateUserInput(validateUsername.test(fname), firstNameErrorMsg, "first name");
+    },100);
+});
 
-  
-  if (fname.length < 2) {
-    timer = setTimeout(()=> {
-      firstNameErrorMsg.style.display = "block";
-      firstNameErrorMsg.textContent = "user name does not meet the minimum length"
-      console.log("user name does not meet the minimum length", typeof fname);
-    }, 500);
-  } 
-  else if (typeof fname === "number" ) {
-    timer = setTimeout(()=> {
-      firstNameErrorMsg.style.display = "block";
-      firstNameErrorMsg.textContent = "Please enter valid character";
-      console.log("Please enter valid character", typeof fname);
-    }, 500);
-  } else if (firstName.length === 0 ) {
-    timer = setTimeout( ()=> {
-      firstNameErrorMsg.style.display = "none";
-    }, 500)
-  }
-  else {
-    timer = setTimeout(()=> {
-      firstNameErrorMsg.setAttribute("display", "none");
-      //firstNameErrorMsg.textContent = "Please enter valid character";
-      console.log("valid character entered", typeof fname);
-    }, 500)
-  }
+lastName.addEventListener("keydown", (e) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    let lname = e.target.value.trim();
+    validateUserInput(validateUsername.test(lname), lastNameErrorMsg, "last name");
+  }, 100);
+});
+
+address.addEventListener("keydown", (e) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    let adressName = e.target.value.trim();
+    validateUserInput(validateUserAddress.test(adressName), addressErrorMsg, "adress");
+    }, 100);
+});
+
+city.addEventListener("keydown", (e) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    let cityName = e.target.value.trim();
+    validateUserInput(validateUserAddress.test(cityName), cityErrorMsg, "city name");
+  }, 100);
 })
 
+email.addEventListener("keydown", (e) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    let emailAdress = e.target.value.trim();
+    //validateEmail(emailAdress) ? console.log("valid") : console.log("not valid");
+    validateUserInput(validateEmail(emailAdress), emailErrorMsg, "email adress");
+    }, 100);
+});
