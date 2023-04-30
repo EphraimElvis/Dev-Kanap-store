@@ -10,14 +10,23 @@ const itemQuantity = document.querySelector(".itemQuantity");
 //let getImage = null;
 //track current state of order
 const orderItem = { //orderItem
-  productId: "",
+  _id: "",
   price: 0,
   color: "",
   quantity: 0,
   image: "",
-  productName: "",
+  name: "",
   altTxt: "",
 }
+
+//get page id
+function getPageId () { 
+  const params = new URLSearchParams(document.location.search);
+  let _id = params.get("id");
+  return _id;
+}
+
+//export { getPageId }
 
 //update order item color
 const updateCartColor = (color) => {
@@ -28,38 +37,37 @@ const setQuantity = (qnt) => {
   orderItem.quantity = qnt;
 }
 
-//get page url id  
-const params = new URLSearchParams(document.location.search);
-let productId = params.get("id");
-//update product id in the obj
-orderItem.productId = productId;
+orderItem._id = getPageId();
+
 
 //get data based on product id
-fetch(`http://localhost:3000/api/products/${productId}`)
+fetch("http://localhost:3000/api/products/" + getPageId())
   .then((res) => res.json())
   .then((data) => {
+    console.log("data")
     showImage(data);
 }).catch((err)=>{
   console.log(Error(err));
-})
+});
+
+//get product id 
 
 //display item
-const showImage = (pr) => {  
+const showImage = (item) => {  
   //itemImg.innerHTML =`<img src=${pr.imageUrl} alt=${pr.altTxt}>`;
   itemImg.appendChild(createImg);
-  createImg.src = `${pr.imageUrl}`;
-  createImg.alt = `${pr.altTxt}`;
+  createImg.src = item.imageUrl;
+  createImg.altTxt = item.altTxt;
   createImg.setAttribute("id","img_tag");
-  productName.innerHTML = pr.name;
-  productPrice.innerHTML = pr.price;
-  productDescription.innerHTML = pr.description;
+  productName.innerHTML = item.name;
+  productPrice.innerHTML = item.price;
+  productDescription.innerHTML = item.description;
   //update order Item object
-  orderItem.price = pr.price;
-  orderItem.productName = pr.name;
-  orderItem.image = pr.imageUrl;
-  createSelectOptions(pr);
-  //const getImage = document.getElementById("img_tag");
-  //drawImage(getImage);
+  orderItem.price = item.price;
+  orderItem.name = item.name;
+  orderItem.image = item.imageUrl;
+  orderItem.altTxt = item.altTxt;
+  createSelectOptions(item);
 }
 
 //create select options
@@ -75,7 +83,6 @@ const createSelectOptions = (arr) => {
 //select color
 selectColor.addEventListener('change', (e)=> {
   let currentColor = e.target.value;
-  checkColorSelect = e.target.value;
   //update orderItem color
   updateCartColor(currentColor);
   const checkQuantity = (orderItem.quantity === 0 ? 1 : orderItem.quantity);
@@ -98,7 +105,7 @@ addOrderItemtoCart.addEventListener("click", (e) => {
   const cartStorage = JSON.parse(localStorage.getItem('carts'));
   const carts = cartStorage || [];
   const already = carts.find( (product) => {
-    const matchId = product.productId === orderItem.productId;
+    const matchId = product._id === orderItem._id;
     const matchColor = product.color === orderItem.color;
     return matchId && matchColor;
   }) 
@@ -107,18 +114,16 @@ addOrderItemtoCart.addEventListener("click", (e) => {
   //make this a module sice it repeats in other js file
   if (already) {
     already.quantity += orderItem.quantity;
-    already.price = already.originalPrice * Number(already.quantity);
-    //console.log(" total price", already.originalPrice * Number(already.quantity));
   } else {
     //push to local array of onjects
     carts.push({
-      "productId": orderItem.productId,
+      "_id": orderItem._id,
       "color": orderItem.color,
-      "originalPrice": productPrice.textContent,
-      "price": orderItem.price,
+      //do not store price in the localstorage
+      //"price": orderItem.price,
       "quantity": orderItem.quantity,
-      "image": orderItem.image,
-      "name": orderItem.productName,
+      "imageURL": orderItem.image,
+      "name": orderItem.name,
       "altTxt": orderItem.altTxt,
     });
   }

@@ -1,8 +1,59 @@
-//get carts from local storage
-const cartsInLocalStorage = JSON.parse(localStorage.getItem("carts"));
-const getCartItems = document.querySelector("#cart__items");
-const fragment = new DocumentFragment();
+//get carts
+function getCart () {
+  return JSON.parse(localStorage.getItem("carts")) || [] ;
+}
 
+//set cart item
+function setCart (cart) {
+  localStorage.setItem("carts", JSON.stringify(cart));
+}
+
+//update cart
+function updateCart (item) {
+  const cart = getCart();
+
+  for (let i = 0; i < cart.length; i++) {
+    const cartItem = cart[i];
+
+    if (cartItem._id === item._id) {
+      cart[i] = item;
+      break;
+    }
+  }
+  setCart(cart);
+}
+
+//delete cart
+function deleteCartItem (id) {
+  const cart = getCart();
+  console.log("deleteCartItem", id," index ")
+  for (let i = 0; i < cart.length; i++) {
+    const cartItem = cart[i];
+    if (cartItem._id === id) {
+      cart.splice(i, 1)
+      //
+      break;
+    }
+  }
+  setCart(cart);
+}
+
+
+const totalPrice = document.querySelector("#totalPrice");
+//update total price
+function updateTotal(item) {
+  const cart = getCart();
+
+  const total = cart.reduce((total, product) => {
+    return (total + (item * product.quantity));
+  }, 0);
+  totalPrice.textContent = total;
+}
+
+//get carts from local storage
+const cartsInLocalStorage = getCart();
+
+const getCartItems = document.querySelector("#cart__items");
 //create elememt
 const createElements = (tag, attributes = []) => {
   const element = document.createElement(tag);
@@ -11,263 +62,174 @@ const createElements = (tag, attributes = []) => {
   }
   return element;
 }
-//Parent element
-const articleObj = [
-  {
-    name: "class",
-    value: "cart__item"
-  },
-  {
-    name: "data-index",
-    value: ""
-  },
-  {
-    name:"data-id", 
-    value: ""
-  }
-];
 
-const creatDivObj = [{name: "class", value: "cart__item__img"}];
-const creatImgObj = [{name: "src", value: ""}];
-const createCartItemContentObj = [{name: "class", value:"cart__item__content"}];
-const createCartItemContentDescriptionObj = [{name: "class", value: "cart__item__content__description"}];
-const createH2Obj = [{name: ""}];
-const deleteObj = [
-  {name:"class", value:"deleteItem"},
-  {name:"data-delete-id", value: "1"}
-];
-const createCartItemContentSettingsObj = [{name: "class", value: "cart__item__content__settings__quantity"}];
-const createCartItemContentSettingsQuantityObj = [{name: "class", value: "cart__item__content__settings__quantity"}];
-const createItemQuantityInputObj = [
-  {name: "class", value: "itemQuantity"},
-  {name: "type", value: "number"},
-  {name: "name", value: "itemQuantity"},
-  {name: "min", value: "1"},
-  {name: "max", value: "100"},
-  {name: "value", value: "45"},
-  {name: "data-index", value: ""},
-]
-
-const createCartItemContentSettingsDeleteObj = [
-  {name: "class", value: "cart__item__content__settings__delete"},
-  {name: "class", value: "deleteItem"},
-  {name: "data-delete-id", value: ""},
-  {name: "min", value: "1"},
-  {name: "max", value: "100"}
-]
-
-//set article id
-function setAttributesAndId(obj = {}, id, total) {
-  let newObj = {};
-  for (const prop in obj) {
-    if (obj[prop].name === "data-index") {
-        obj[prop].value = id;
-        newObj = obj;
-    }
-    if (obj[prop].name === "data-id") {
-      obj[prop].value = id;
-      newObj = obj;
-    }
-    if (obj[prop].name === "data-delete-id") {
-      obj[prop].value = id;
-      newObj = obj;
-    }
-    if (obj[prop].name === "value") {
-      obj[prop].value = total;
-      console.log("props === ", obj[prop].value)
-      newObj = obj;
-    }
-  }
-  return newObj;
+//set price
+function setProductPrice (price) {
+  return price;
 }
 
-//set image
-function setImageName(obj, val) {
-  obj[0].value = val.image;
-}
+cartsInLocalStorage.forEach((product, id) => {
+  
+  const productPrice = createElements("p");
+   //fetch price from the api
+  fetch("http://localhost:3000/api/products/" + product._id)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not OK");
+      }
+      return response.json();
+    })
+    .then((item) => {
+      //display product
+      productPrice.textContent = "€$" + item.price;
+      //update total price when page loads
+      updateTotal(item.price);
 
-function addElements(value, id) {
-  //console.log("quantity ", value['quantity'], id)
-  setImageName(creatImgObj, value);
-  //setAttributesAndId(articleObj, id);
-  setAttributesAndId(createCartItemContentSettingsDeleteObj, id);
-  const creatArticle = createElements("article", setAttributesAndId(articleObj, id));
-  const creatDiv = createElements("div", creatDivObj);
-  const creatImg = createElements("img", creatImgObj);
-  const createCartItemContent = createElements("div", createCartItemContentObj);
-  const createCartItemContentDescription = createElements("div", createCartItemContentDescriptionObj);
-  const createParagraph = createElements("p");
-  createParagraph.textContent = `${value.name}`;
-  const createParagraphTwo = createElements("p");
-  createParagraphTwo.textContent = `${value.color}`;
-  const createParagraphThree = createElements("p");
-  const createParagraphFour = createElements("p");
-  createParagraphFour.textContent = "Quantity :";
-  const deleteItem = createElements("p", deleteObj);
+      //addEventListener
+      cartItemQuantity.addEventListener("change", () => {
+    
+        if (cartItemQuantity.value > 0) {
+          product.quantity = parseInt(cartItemQuantity.value);
+          updateCart(product);
+        } else {
+          deleteCartItem(product._id);
+          cartItem.remove();
+        }
+        //update total price when quantity changes
+        updateTotal(item.price);
+      }) ;
+
+    })
+    .catch((error) => {
+      console.log("There has been a problem with your fetch operation:", error)
+    })
+
+  //product cart item
+  const cartItem = createElements("article", [
+    {
+      name: "class",
+      value: "cart__item"
+    },
+    {
+      name: "data-id",
+      value: product._id
+    },
+    {
+      name:"data-color", 
+      value: product.color
+    }
+  ]);
+
+  const cartItemDivImg = createElements("div", [
+    {
+      name: "class",
+      value: "cart__item__img"
+    }
+  ]);
+
+  const cartItemImg = createElements("img", [
+    {
+      name: "src",
+      value: product.imageURL
+    },
+    {
+      name: "alt",
+      value: product.altTxt
+    }
+  ]);
+
+  const cartItemContent = createElements("div", [
+    {
+      name: "class",
+      value: "cart__item__content"
+    }
+  ]);
+
+  const cartItemContentDescription = createElements("div", [
+    {
+      name: "class",
+      value: "cart__item__content__description"
+    }
+  ]);
+
+  const productName = createElements("h2");
+  productName.textContent = product.name;
+  const productColor = createElements("p");
+  productColor.textContent = product.color;
+
+  const deleteItem = createElements("p", [
+    {
+      name: "class",
+      value: "deleteItem"
+    }
+  ]);
   deleteItem.textContent = "Delete";
-  deleteItem.addEventListener("click", () => {
-    //creatArticle.remove();
-    console.log("delete ");
+  deleteItem.addEventListener("click",() => {
+    deleteCartItem(product._id);
+    cartItem.remove();
   })
-  const createCartItemContentSettings = createElements("div", createCartItemContentDescriptionObj);
-  const createCartItemContentSettingsQuantity = createElements("div", createCartItemContentSettingsQuantityObj);
-  const createItemQuantityInput = createElements("input", setAttributesAndId(createItemQuantityInputObj, id, value['quantity']));
-  const createCartItemContentSettingsDelete = createElements("div", setAttributesAndId(createCartItemContentSettingsDeleteObj, id));
 
-  creatDiv.appendChild(creatImg);
-  creatArticle.appendChild(creatDiv);
-  creatArticle.appendChild(createCartItemContent);
-  createCartItemContent.appendChild(createCartItemContentDescription);
-  createCartItemContentDescription.appendChild(createParagraph);
-  createCartItemContentDescription.appendChild(createParagraphTwo);
-  createCartItemContentDescription.appendChild(createParagraphThree);
-  createCartItemContent.appendChild(createCartItemContentSettings);
-  createCartItemContentSettingsQuantity.appendChild(createParagraphFour);
-  createCartItemContentSettings.appendChild(createCartItemContentSettingsQuantity)
-  createCartItemContentSettingsQuantity.appendChild(createItemQuantityInput);
-  createCartItemContentSettings.appendChild(createCartItemContentSettingsDelete)
-  createCartItemContentSettingsDelete.appendChild(deleteItem);
-  fragment.appendChild(creatArticle);
-}
+  const cartItemContentSettings = createElements("div", [
+    {
+      name: "class",
+      value: "cart__item__content__settings"
+    }
+  ]);
 
-cartsInLocalStorage.map((val, id) => {
-  addElements(val, id);
+  const cartItemContentSettingsQuantity = createElements("div", [
+    {
+      name: "class",
+      value: "cart__item__content__settings__quantity"
+    }
+  ]);
+
+  const cartItemQuantityDescription = createElements("p");
+  cartItemQuantityDescription.textContent = "Quantity: ";
+
+  const cartItemQuantity = createElements("input", [
+    {
+      name: "class", 
+      value: "itemQuantity"
+    },
+    {
+      name: "type", 
+      value: "number"
+    },
+    {
+      name: "name", 
+      value: "itemQuantity"
+    },
+    {
+      name: "min", 
+      value: "1"
+    },
+    {
+      name: "max", 
+      value: "100"
+    },
+    {
+      name: "value", 
+      value: product.quantity
+    }
+  ]);
+
+  const cartItemContentSettingsDelete = createElements("div", [
+    {
+      name: "class",
+      value: "cart__item__content__settings__delete"
+    }
+  ]);
+
+  //add elements to documents
+  cartItem.append(cartItemDivImg, cartItemContent);
+  cartItemDivImg.append(cartItemImg);
+  cartItemContent.append(cartItemContentDescription, cartItemContentSettings);
+  cartItemContentDescription.append(productName, productColor, productPrice);
+  cartItemContentSettings.append(cartItemContentSettingsQuantity, cartItemContentSettingsDelete);
+  cartItemContentSettingsQuantity.append(cartItemQuantityDescription, cartItemQuantity);
+  cartItemContentSettingsDelete.append(deleteItem);
+  getCartItems.appendChild(cartItem);
 });
-
-getCartItems.appendChild(fragment);
-
-
-
-//create elements
-// const createElements = (val, id) => {
-//   const creatArticle = document.createElement("article");
-//   const creatDiv = document.createElement("div");
-//   const creatImg = document.createElement("img");
-//   const createCartItemContent = document.createElement("div")
-//   const createCartItemContentDescription = document.createElement("div");
-//   const createH2 = document.createElement("h2");
-//   const createParagraph = document.createElement("p");
-//   const createParagraphTwo = document.createElement("p");
-//   const createParagraphThree = document.createElement("p");
-//   const createParagraphFour = document.createElement("p");
-//   const deleteItem = document.createElement("p");
-//   const createCartItemContentSettings = document.createElement("div");
-//   const createCartItemContentSettingsQuantity = document.createElement("div");
-//   const createItemQuantityInput = document.createElement("input")
-//   const createCartItemContentSettingsDelete = document.createElement("div");
-
-//   creatArticle.setAttribute("class", "cart__item");
-//   creatArticle.setAttribute("data-index", `${id}`);
-//   creatArticle.setAttribute("data-id", `${id}`);
-//   creatArticle.setAttribute("data-color", "product-color");
-//   creatDiv.setAttribute("class", "cart__item__img");
-//   createParagraphThree.setAttribute("id", "price");
-//   createCartItemContent.setAttribute("class", "cart__item__content");
-//   createCartItemContentDescription.setAttribute("class","cart__item__content__description");
-//   createCartItemContentSettings.setAttribute("class","cart__item__content__settings");
-//   createCartItemContentSettingsQuantity.setAttribute("class","cart__item__content__settings__quantity");
-
-//   creatImg.setAttribute("src", `${val.image}`);
-//   creatImg.setAttribute("alt", `${val.altTxt}`);
-//   creatDiv.appendChild(creatImg);
-//   creatArticle.appendChild(creatDiv);
-//   creatArticle.appendChild(createCartItemContent);
-//   createCartItemContent.appendChild(createCartItemContentDescription);
-//   createParagraph.textContent = `${val.name}`;
-//   createParagraphTwo.textContent = `${val.color}`;
-//   //load this section from the api
-//   //todos
-//     //load product using fetch 
-//   createParagraphThree.textContent = `€${val.originalPrice}`;
-//   createCartItemContentDescription.appendChild(createParagraph);
-//   createCartItemContentDescription.appendChild(createParagraphTwo);
-//   createCartItemContentDescription.appendChild(createParagraphThree);
-//   createCartItemContent.appendChild(createCartItemContentSettings);
-//   createCartItemContentSettings.appendChild(createCartItemContentSettingsQuantity)
-//   createParagraphFour.textContent = "Quantity :";
-//   createCartItemContentSettingsQuantity.appendChild(createParagraphFour);
-//   createItemQuantityInput.setAttribute("class","itemQuantity");
-//   createItemQuantityInput.setAttribute("type","number");
-//   createItemQuantityInput.setAttribute("name","itemQuantity")
-//   createItemQuantityInput.setAttribute("min","1")
-//   createItemQuantityInput.setAttribute("max","100")
-//   createItemQuantityInput.setAttribute("value",`${val.quantity}`);
-//   createItemQuantityInput.setAttribute("data-index", `${id}`);
-//   createItemQuantityInput.addEventListener("change",()=> {
-//     console.log("val ", createItemQuantityInput.value );
-//   })
-//   createCartItemContentSettingsQuantity.appendChild(createItemQuantityInput);
-//   createCartItemContentSettings.appendChild(createCartItemContentSettingsDelete)
-//   createCartItemContentSettingsDelete.setAttribute("class","cart__item__content__settings__delete");
-//   deleteItem.setAttribute("class", "deleteItem");
-//   deleteItem.setAttribute("data-delete-id", `${id}`);
-//   deleteItem.textContent = "Delete";
-//   deleteItem.addEventListener("click", () => {
-//     creatArticle.remove();
-//     //todos
-//       //add event 
-//   })
-//   createCartItemContentSettingsDelete.appendChild(deleteItem);
-//   fragment.appendChild(creatArticle);
-// }
-// cartsInLocalStorage.map((items, index) => {
-//   createElements(items, index) ;
-// });
-
-// getCartItems.appendChild(fragment);
-
-
-
-
-//delete item in cart 
-// const items = document.querySelector(".cart");
-// items.addEventListener("click", (event) => {
-//   event.stopImmediatePropagation();
-//   const delete_id = event.target.dataset.deleteId;
-//   //console.log("fill",cartsInLocalStorage[delete_id]);
-//   if (event.target.classList.value === "deleteItem") {
-//     const filteredCarts = cartsInLocalStorage.filter((fill) => {
-//       let cartItems = cartsInLocalStorage[delete_id] !== fill;
-
-//       return cartItems;
-//     });
-
-//     //remove element
-//     //document.querySelector(`[data-id="${delete_id}"]`).remove();
-//     localStorage.setItem("carts",JSON.stringify(filteredCarts));
-//     window.location.reload();
-//     getTotal();
-//   }
-// });
-
-//update Price based on Quantity
-// const article = document.querySelector("#cart__items");
-// article.addEventListener("click",(event) => {
-//   let quantity = Number(event.target.value);
-//   if (event.target.tagName === "INPUT") {
-//     event.stopPropagation();
-//     for (const el of cartsInLocalStorage) {
-//       const index = event.target.dataset.index;
-//       const m = cartsInLocalStorage[index];
-//       m.quantity = quantity;
-//       m.price = quantity * Number(m.originalPrice);
-//       localStorage.setItem("carts", JSON.stringify(cartsInLocalStorage));
-//       getTotal();
-//       return;
-//     }
-//   }
-// });
-
-//total price
-// const totalPrice = document.querySelector("#totalPrice");
-// function getTotal() {
-//   const total = cartsInLocalStorage.reduce((total, num)=>{
-//     //return val;
-//     return (total + num.price);
-//   }, 0);
-//   totalPrice.textContent = total;
-// }
-//getTotal();
 
 //form validation variables
 const firstName = document.querySelector("#firstName");
@@ -281,6 +243,7 @@ const cityErrorMsg = document.querySelector("#cityErrorMsg");
 const email = document.querySelector("#email");
 const emailErrorMsg = document.querySelector("#emailErrorMsg");
 const order = document.querySelector("#order");
+const onSubmit = document.querySelector(".cart__order__form");
 
 
 let timer = null;
@@ -317,63 +280,90 @@ const contactObj = {
   order: []
 }
 
-//Event listener
-firstName.addEventListener("keydown", (e)=> {
-  clearTimeout(timer);
-  timer = setTimeout(()=> {
-    let fname = e.target.value.trim();
-    validateUserInput(validateUsername.test(fname), firstNameErrorMsg, "first name");
-  },100);
-});
+function sendContactData () {
+  return new Promise((resolve, reject) => {
+  const cart = getCart();
+  const products = []
 
-lastName.addEventListener("keydown", (e) => {
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    let lname = e.target.value.trim();
-    validateUserInput(validateUsername.test(lname), lastNameErrorMsg, "last name");
-  }, 100);
-});
+  for (let index = 0; index < cart.length; index++) {
+    const cartItem = cart[index];
+    products.push(cartItem._id);
+  }
 
-address.addEventListener("keydown", (e) => {
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    let adressName = e.target.value.trim();
-    validateUserInput(validateUserAddress.test(adressName), addressErrorMsg, "adress");
-  }, 100);
-});
-
-city.addEventListener("keydown", (e) => {
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    let cityName = e.target.value.trim();
-    validateUserInput(validCity.test(cityName), cityErrorMsg, "city name");
-  }, 100);
-})
-
-email.addEventListener("keydown", (e) => {
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    let emailAdress = e.target.value.trim();
-    validateUserInput(validateEmail(emailAdress), emailErrorMsg, "email adress");
-  }, 100);
-});
-
-const sendContactData = () => {
   const order  =  {
-    contacts : {
+    contact : {
       firstName: firstName.value,
       lastName: lastName.value,
       address: address.value,
       city: city.value,
       email: email.value,
     },
-    products : [
-      //strings or the product ids
-      
-    ]
+    products
   }
-}
-sendContactData();
 
-// why use get insteatd of post.
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(order),
+  })
+    .then((re) => {
+      console.log("status",re);
+      if (re.ok) {
+        console.log("status okay", re.status);
+        return re.json();
+      } else {
+        console.log("status not okay",re.status);
+      }
+    }).then((data)=> {
+      resolve(data.orderId)
+     
+    }).catch((error)=> {
+      reject(error);
+    });
+  });
+};
+
+onSubmit.addEventListener("submit", (e)=> {
+
+  e.preventDefault();
+
+  let fname = firstName.value;
+  validateUserInput(validateUsername.test(fname), firstNameErrorMsg, "first name");
+
+  let lname = lastName.value;
+  validateUserInput(validateUsername.test(lname), lastNameErrorMsg, "last name");
+
+  let addressName = address.value;
+  validateUserInput(validateUserAddress.test(addressName), addressErrorMsg, "address");
+  
+  let cityName = city.value;
+  validateUserInput(validCity.test(cityName), cityErrorMsg, "city name");
+  
+  let emailAddress = email.value;
+  validateUserInput(validateEmail(emailAddress), emailErrorMsg, "email address");
+
+  if (validateUsername.test(fname) && validateUsername.test(lname) && validateUserAddress.test(addressName) && validCity.test(cityName) && validateEmail(emailAddress)) {
+    sendContactData()
+      .then((orderId)=> {   
+        
+        console.log("deleting")     
+        for (let i = 0; i < cartsInLocalStorage.length; i++) {
+          const element = cartsInLocalStorage[i]._id;
+          deleteCartItem(element);
+        }
+        
+        window.location.href = "confirmation.html?id=" + orderId;
+      })
+      .catch((err)=> {
+        console.error(err)
+      })
+    
+  } else {
+    alert("Please correct data input");
+  }
+  
+});
+
 
